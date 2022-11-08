@@ -15,7 +15,7 @@ _ITEM_DEFAULT_TTL_SECONDS = 60
 _KEY = os.getenv("KEY")
 _SKIPCACHE = os.getenv("SKIP_CACHE")
 
-client = MongoClient('mongodb+srv://momentomongo:not-my-password@cluster0.oko2ogn.mongodb.net/test')
+client = MongoClient('mongodb+srv://not-my-username:not-my-password@cluster0.oko2ogn.mongodb.net/test')
 
 async def _create_cache(cache_client: scc.SimpleCacheClient, cache_name: str) -> None:
     try:
@@ -41,9 +41,11 @@ async def main() -> None:
         await _create_cache(cache_client, _CACHE_NAME)
         await _list_caches(cache_client)
         skip_cache = _SKIPCACHE=="True"
-
+        results_dict = {}
+        
         for x in range(10):
             print(f"Attempt {x+1!r}")
+            loopStartTime = time.time()
             if (skip_cache):
                 result = await get_results()
                 json_data = dumps(result) 
@@ -61,6 +63,10 @@ async def main() -> None:
                     print(f"Setting Key: {_KEY!r}")
                     await cache_client.set(_CACHE_NAME, _KEY, json_data)
                     print(f"Value stored in Momento (cut-off at 100 chars): {json_data[0:100]!r}")
+            executionTime = (time.time() - loopStartTime)
+            results_dict[x] = executionTime
+        # finally
+        await get_avg_results(results_dict)
 
 async def get_results():
     result = client['sample_analytics']['transactions'].aggregate([
@@ -88,8 +94,14 @@ async def get_results():
             ])
     return result
 
+async def get_avg_results(_result_dict):
+    etime = 0
+    for i in _result_dict.values():
+        etime += i
+    return print(f'Average execution time in seconds: {etime/len(_result_dict)!r}')
+    
 if __name__ == "__main__":
-    startTime = time.time()
+    programStartTime = time.time()
     asyncio.run(main())
-    executionTime = (time.time() - startTime)
-    print('Execution time in seconds: ' + str(executionTime))
+    totalExecutionTime = (time.time() - programStartTime)
+    print(f'Total execution time in seconds: {totalExecutionTime!r}')
