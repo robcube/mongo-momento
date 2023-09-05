@@ -1,7 +1,0 @@
-  File "/Users/rob.koch/Library/Python/3.11/lib/python/site-packages/momento/_momento_endpoint_resolver.py", line 26, in resolve
-    return _getEndpointFromToken(auth_token)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/rob.koch/Library/Python/3.11/lib/python/site-packages/momento/_momento_endpoint_resolver.py", line 37, in _getEndpointFromToken
-    raise errors.InvalidArgumentError("Invalid Auth token.") from None
-momento.errors.InvalidArgumentError: Invalid Auth token.
-
